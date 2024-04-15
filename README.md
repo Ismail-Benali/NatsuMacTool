@@ -24,8 +24,30 @@ NatsuMacTool is a simple script written in Bash to automatically set a random MA
     ```
     sudo ./NatsuMacTool.sh
     ```
-4. Upon system startup, the script will automatically set a random MAC address for the primary network interface.
+4. (Optional) Make the script run automatically on system startup by following these steps:
+   - Open the `rc.local` file for editing with sudo privileges:
+     ```
+     sudo nano /etc/rc.local
+     ```
+   - Add the following line before the line `exit 0`:
+     ```
+     /bin/bash /path/to/NatsuMacTool.sh
+     ```
+     Replace `/path/to/NatsuMacTool.sh` with the full path to your script file.
+   - Save the changes and exit the editor.
+   - Make sure that `rc.local` is executable by running:
+     ```
+     sudo chmod +x /etc/rc.local
+     ```
+   - Reboot your system to apply the changes:
+     ```
+     sudo reboot
+     ```
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Contact:
+
+For any inquiries or support, please contact ismail-benali@proton.me.
