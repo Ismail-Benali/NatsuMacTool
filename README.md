@@ -43,9 +43,6 @@ NatsuMacTool is a simple script written in Bash to automatically set a random MA
      ```
      sudo reboot
      ```
-### Contact:
-
-For any inquiries or support, please contact ismail-benali@proton.me.
 
 ## License
 
