@@ -18,8 +18,21 @@ generate_random_mac() {
            $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256))
 }
 
-# Get the network interface name
-interface=$(nmcli -t -f NAME device show | head -n 1)
+# Get a list of all network interfaces and their corresponding MAC addresses
+interfaces_and_macs=$(nmcli -t -f NAME,GENERAL.HWADDR device show)
 
-# Set a random MAC address for the network interface
-nmcli connection modify "$interface" ethernet.cloned-mac-address "$(generate_random_mac)"
+# Iterate over each network interface and set a unique random MAC address
+while IFS= read -r line; do
+    # Extract interface name and current MAC address from the line
+    interface=$(echo "$line" | cut -d: -f1)
+    current_mac=$(echo "$line" | cut -d: -f2)
+    
+    # Generate a random MAC address
+    random_mac=$(generate_random_mac)
+    
+    # Set the random MAC address for the network interface
+    nmcli connection modify "$interface" ethernet.cloned-mac-address "$random_mac"
+    
+    # Output the interface name, its current MAC address, and the new MAC address
+    echo "Interface: $interface - Current MAC Address: $current_mac - New MAC Address: $random_mac"
+done <<< "$interfaces_and_macs"
