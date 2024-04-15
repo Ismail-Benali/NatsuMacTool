@@ -1,8 +1,5 @@
 ![natsumactool](https://github.com/Ismail-Benali/NatsuMacTool/assets/90980178/7bb19ef7-3836-40ce-b66b-0c248fe021bc)
-
-# NatsuMacTool
-
-NatsuMacTool is a simple script written in Bash to automatically set a random MAC address for the primary network interface upon system startup in Linux.
+ is a simple script written in Bash to automatically set a random MAC address for the primary network interface upon system startup in Linux.
 
 ## Features
 
