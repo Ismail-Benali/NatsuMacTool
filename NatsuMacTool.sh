@@ -85,8 +85,9 @@ for interface in "${devices[@]}"; do
         continue
     fi
 
-    # Get current MAC address
-    current_mac=$(nmcli -t -f GENERAL.HWADDR device show "$interface" | cut -d= -f2)
+    # Get current MAC address - FIXED: Use sed to extract MAC after the colon
+    # nmcli -t output format: GENERAL.HWADDR:00:11:22:33:44:55
+    current_mac=$(nmcli -t -f GENERAL.HWADDR device show "$interface" | sed 's/^GENERAL.HWADDR://')
     
     # Skip if MAC address is empty or unavailable
     if [[ -z "$current_mac" || "$current_mac" == "--" ]]; then
@@ -94,7 +95,6 @@ for interface in "${devices[@]}"; do
     fi
 
     # Find the active Connection Profile name associated with this specific device
-    # This fixes the critical bug of assuming the device name equals the connection name
     conn_name=$(nmcli -t -f NAME,DEVICE connection show --active | awk -F: -v dev="$interface" '$2 == dev {print $1; exit}')
 
     if [[ -z "$conn_name" ]]; then
@@ -112,17 +112,26 @@ for interface in "${devices[@]}"; do
     if [ "$DRY_RUN" = true ]; then
         log_message "    ${YELLOW}[DRY-RUN] Skipped applying changes.${NC}"
     else
-        # Modify the connection profile (specifying both ensures compatibility across all NM versions)
-        if nmcli connection modify "$conn_name" ethernet.cloned-mac-address "$new_mac" wifi.cloned-mac-address "$new_mac" 2>/dev/null; then
+        # Determine connection type to apply the correct property
+        conn_type=$(nmcli -t -f TYPE connection show "$conn_name" | cut -d: -f2)
+        
+        if [[ "$conn_type" == "802-11-wireless" ]]; then
+            modify_cmd="wifi.cloned-mac-address"
+        else
+            modify_cmd="ethernet.cloned-mac-address"
+        fi
+        
+        # Modify the connection profile with the correct property
+        if nmcli connection modify "$conn_name" "$modify_cmd" "$new_mac" 2>/dev/null; then
             
             # Restart the connection to apply changes immediately
             nmcli connection down "$conn_name" >/dev/null 2>&1
-            sleep 2 # Increased for stability on slower hardware
+            sleep 2
             nmcli connection up "$conn_name" >/dev/null 2>&1
-            sleep 2 # Allow time for the interface to fully re-initialize and get DHCP
+            sleep 2
 
             # Verify that the change was successfully applied
-            verify_mac=$(nmcli -t -f GENERAL.HWADDR device show "$interface" | cut -d= -f2)
+            verify_mac=$(nmcli -t -f GENERAL.HWADDR device show "$interface" | sed 's/^GENERAL.HWADDR://')
             
             if [[ "$verify_mac" == "$new_mac" ]]; then
                 log_message "    ${GREEN}[+] Successfully applied and verified.${NC}"
