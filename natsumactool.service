@@ -1,0 +1,12 @@
+[Unit]
+Description=NatsuMacTool - Automatic Random MAC Address Spoofer
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/natsumactool
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
