@@ -1,32 +1,33 @@
 ![NatsuMacTool Banner](https://github.com/Ismail-Benali/NatsuMacTool/assets/90980178/a0d62156-77ad-4708-85e1-5066e1686a32)
 
-# 🛡️ NatsuMacTool v2.1.0
+# 🛡️ NatsuMacTool v2.2.0 (Ultimate Edition)
 
-**A secure, robust, and production-ready Bash script for MAC address randomization and management on Linux.**
+**An advanced, production-ready MAC address spoofer and manager for Linux with config file support, status monitoring, and NetworkManager dispatcher triggers.**
 
 [![Release](https://img.shields.io/github/v/release/Ismail-Benali/NatsuMacTool?style=flat-square&color=blue)](https://github.com/Ismail-Benali/NatsuMacTool/releases) [![License](https://img.shields.io/github/license/Ismail-Benali/NatsuMacTool?style=flat-square&color=green)](https://github.com/Ismail-Benali/NatsuMacTool/blob/main/LICENSE) ![Bash](https://img.shields.io/badge/Bash-4.0+-green?style=flat-square&logo=gnu-bash) ![Linux](https://img.shields.io/badge/Linux-NetworkManager-blue?style=flat-square&logo=linux)
 
 ## 📖 Overview
 
-NatsuMacTool is an advanced Bash script designed to automatically randomize or manage MAC addresses for network interfaces using NetworkManager (nmcli).
+NatsuMacTool is a powerful Bash script designed to manage and randomize MAC addresses securely. 
 
-In v2.1.0, we introduced targeted interface selection (`-i`), hardware MAC restoration (`-r`), and an automated system-wide installer (`install.sh`) to simplify deployment as a systemd service.
+In v2.2.0 (Ultimate Edition), we added:
+- **Status Dashboard (`--status`):** Inspect hardware vs. spoofed MAC addresses of all interfaces instantly.
+- **Configuration File (`/etc/natsumactool.conf`):** Easily blacklist or exclude interfaces you don't want modified.
+- **NetworkManager Dispatcher Hook:** Automatically trigger MAC randomization whenever an interface comes up.
+- **Fallback mechanism:** Direct `iproute2` (`ip link`) support if NetworkManager profiles aren't active.
 
 ## ✨ Features
 
-- 🔒 **LAA-Compliant MAC Generation:** Generates valid Locally Administered Addresses (starting with 02) to prevent OUI conflicts and network bans.
-- 🎯 **Targeted Interface Selection:** Choose to randomize a specific interface (e.g., `natsumactool -i wlan0`) or all active interfaces.
-- ↩️ **MAC Restoration:** Easily revert back to your original hardware MAC address using `natsumactool --restore`.
-- 🛡️ **Safety Filters:** Automatically skips loopback and virtual/container interfaces (`lo`, `docker*`, `virbr*`, `tun*`, `veth*`, `br-*`) to prevent breaking system services.
-- 🧪 **Dry-Run Mode:** Preview all intended changes safely before applying them (`--dry-run` or `-d`).
-- 📝 **Persistent Logging:** All successful changes are logged with timestamps to `/var/log/natsumactool.log`.
-- ✅ **Post-Change Verification:** Confirms the MAC address was successfully applied before reporting success.
+- 🔒 **LAA-Compliant MAC Generation:** Generates valid Locally Administered Addresses (starting with `02`).
+- 📊 **Interface Status Table:** View current and permanent MAC addresses (`sudo natsumactool --status`).
+- 🎯 **Targeted Interface Selection:** Target a specific interface (`sudo natsumactool -i wlan0`).
+- ↩️ **MAC Restoration:** Revert back to original hardware MAC (`sudo natsumactool --restore`).
+- 🛡️ **Configurable Blacklist:** Exclude sensitive interfaces via `/etc/natsumactool.conf`.
+- ⚡ **Dual Engine Support:** Works seamlessly with NetworkManager profiles or direct `ip link` fallback.
 
 ## 🚀 Installation & Usage
 
 ### 1. One-Click System-Wide Installation
-
-Clone the repository and run the automated installer with root privileges:
 
 ```bash
 git clone https://github.com/Ismail-Benali/NatsuMacTool.git
@@ -34,48 +35,41 @@ cd NatsuMacTool
 sudo ./install.sh
 ```
 
-This installs `natsumactool` globally to `/usr/local/bin` and sets up the systemd auto-start service automatically.
+### 2. Check Interface Status
 
-### 2. Manual Command-Line Usage
+View a clean status table of all your network interfaces, showing their types, current spoofed MACs, and permanent hardware MACs:
 
-Once installed (or run directly from the folder with `./NatsuMacTool.sh`):
+```bash
+sudo natsumactool --status
+```
 
-- **Randomize all active interfaces:**
+### 3. Command Reference
+
+- **Randomize all eligible interfaces:**
   ```bash
   sudo natsumactool
   ```
-
 - **Target a specific interface:**
   ```bash
-  sudo natsumactool --interface wlan0
-  # or short flag:
-  sudo natsumactool -i eth0
+  sudo natsumactool -i wlan0
   ```
-
 - **Restore original hardware MAC:**
   ```bash
   sudo natsumactool --restore
   ```
-
 - **Simulate changes (Dry-Run):**
   ```bash
   sudo natsumactool --dry-run
   ```
 
-- **Show help and options:**
-  ```bash
-  natsumactool --help
-  ```
+## ⚙️ Configuration File
 
-## 📊 Log File
+Located at `/etc/natsumactool.conf`:
 
-All successful MAC address changes are recorded in:
-```text
-/var/log/natsumactool.log
-```
-View the history in real-time:
 ```bash
-sudo tail -f /var/log/natsumactool.log
+# NatsuMacTool Configuration File
+# Add network interfaces you want to exclude from MAC randomization (space-separated)
+EXCLUDE_INTERFACES=("lo")
 ```
 
 ## 📜 License
